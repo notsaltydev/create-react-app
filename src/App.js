@@ -1,37 +1,40 @@
-import React from 'react';
-import UsersList from './UsersList'
-
-const allUsers = ['Michal', 'Kasia', 'Jacek', 'Marta', 'Tomek', 'Ania'];
+import * as React from "react";
+import {ContactsList} from "./ContactsList";
+import {AppHeader} from "./AppHeader";
+import {connect} from "react-redux";
+import {contactsFetched} from "./actions";
 
 class App extends React.Component {
     constructor() {
         super();
-
-        this.state = {
-            filteredUsers: allUsers
-        };
     }
 
-    filterUsers = (e) => {
-        const text = e.currentTarget.value;
-        const filteredUsers = this.getFilteredUsersForText(text)
-        this.setState({
-            filteredUsers
-        })
-    };
-
-    getFilteredUsersForText(text) {
-        return allUsers.filter(user => user.toLowerCase().includes(text.toLowerCase()))
+    componentDidMount() {
+        fetch("https://randomuser.me/api/?format=json&results=10")
+            .then(res => res.json())
+            .then(json => this.props.contactsFetched(json.results));
     }
 
     render() {
         return (
             <div>
-                <input onInput={this.filterUsers}/>
-                <UsersList users={this.state.filteredUsers}/>
+                <AppHeader/>
+                <main className="ui main text container">
+                    <ContactsList contacts={this.props.contacts}/> {/* (2) */}
+                </main>
             </div>
         );
     }
 }
 
-export default App;
+const mapStateToProps = (state) => {
+    return {
+        contacts: state.contacts
+    }
+};
+const mapDispatchToProps = {
+    contactsFetched
+};
+
+export const AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);
+
